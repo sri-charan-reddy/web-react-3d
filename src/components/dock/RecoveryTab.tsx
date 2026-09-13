@@ -88,8 +88,11 @@ export function RecoveryTab() {
         <div className="row">
           <span className="label">Disturbance injection</span>
           {s.mechanism !== 'NONE' && (
-            <span className="chip chip--warn" style={{ marginLeft: 'auto' }}>
-              <Icon name="recovery" size={11} />
+            <span
+              className={`chip ${s.mechanism === 'FAILED' ? 'chip--fault' : 'chip--warn'}`}
+              style={{ marginLeft: 'auto' }}
+            >
+              <Icon name={s.mechanism === 'FAILED' ? 'cross' : 'recovery'} size={11} />
               {s.mechanism.replace(/_/g, ' ')}
             </span>
           )}

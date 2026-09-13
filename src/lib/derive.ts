@@ -6,6 +6,7 @@
  * 250-line `updateUI()`; pulling it out here gives one place to read the rules
  * and keeps every panel consistent with the others.
  */
+import { getConnection } from '@/state/telemetryStore';
 import type { SecurityState, Telemetry, TelemetryFrame } from '@/types/telemetry';
 
 export type Tone = 'emerald' | 'amber' | 'cyan' | 'crimson' | 'muted';
@@ -58,8 +59,17 @@ export function deriveStatus(frame: TelemetryFrame | null): MissionStatus {
   if (!frame) return EMPTY_STATUS;
 
   const telem: Telemetry = frame.telemetry;
-  const sec: SecurityState = frame.security;
+  const sec: SecurityState | null | undefined = frame.security;
   const state = telem.current_state ?? 'IDLE';
+
+  const connectionState = getConnection();
+  const connected = connectionState === 'live';
+  const securityValid = Boolean(sec?.valid === true || telem.security_valid === true);
+  const securityStage = sec?.stage ?? telem.security_stage ?? '';
+  const telemetryAuthStatus = telem.authentication_status ?? '';
+  const stageAuthenticated = Boolean(
+    securityStage === 'AUTHENTICATED' || telem.security_stage === 'AUTHENTICATED',
+  );
 
   const totalCount = telem.rf_total_count || frame.terminals.length || 5;
   const discoveredCount =
@@ -74,7 +84,7 @@ export function deriveStatus(frame: TelemetryFrame | null): MissionStatus {
       state === 'FSOC_ACTIVE' ||
       state === 'OPTICAL_TRACKING',
     authenticated:
-      sec.valid && (sec.stage === 'AUTHENTICATED' || telem.authentication_status === 'AUTHENTICATED'),
+      connected && (securityValid && (stageAuthenticated || telemetryAuthStatus === 'AUTHENTICATED')),
     opticalAligned:
       (state === 'FSOC_ACTIVE' || state === 'FINE_ALIGNMENT') && telem.beacon_detected,
     fsocActive:

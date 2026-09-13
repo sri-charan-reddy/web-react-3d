@@ -70,7 +70,15 @@ function Steps({
             data-tone={fault && active ? 'fault' : undefined}
           >
             <span className="step__node">
-              {done ? <Icon name="check" size={9} /> : step.goal ? '★' : step.num}
+              {done ? (
+                <Icon name="check" size={9} />
+              ) : fault && active ? (
+                <Icon name="cross" size={9} />
+              ) : step.goal ? (
+                '★'
+              ) : (
+                step.num
+              )}
             </span>
             <span className="step__label">{step.label}</span>
           </div>
@@ -90,15 +98,19 @@ export function PipelinePanel() {
     <section className="card panel">
       <div className="panel__head">
         <Icon
-          name={p.recovering ? 'recovery' : 'target'}
+          name={p.failed ? 'cross' : p.recovering ? 'recovery' : 'target'}
           size={14}
-          className={p.recovering ? 'text-warn' : 'text-info'}
+          className={p.failed ? 'text-fault' : p.recovering ? 'text-warn' : 'text-info'}
         />
-        <h3 className="panel__title">{p.recovering ? 'Recovery Ladder' : 'PAT Pipeline'}</h3>
+        <h3 className="panel__title">
+          {p.failed ? 'Recovery Halted' : p.recovering ? 'Recovery Ladder' : 'PAT Pipeline'}
+        </h3>
         <div className="panel__tools">
-          {p.recovering && p.mechanism !== 'NONE' && (
+          {p.failed ? (
+            <span className="chip chip--fault">REJECTED</span>
+          ) : p.recovering && p.mechanism !== 'NONE' ? (
             <span className="chip chip--warn">{p.mechanism.replace(/_/g, ' ')}</span>
-          )}
+          ) : null}
         </div>
       </div>
 

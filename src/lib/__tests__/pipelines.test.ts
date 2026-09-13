@@ -78,9 +78,11 @@ describe('activeRecoveryStep', () => {
       'RF_DIRECTION_RECOVERY',
       'OPTICAL_REACQUISITION',
       'FINE_ALIGNMENT',
+      'RECOVERY_FAILED',
     ];
     for (const state of recoveryStates) {
       expect(activeRecoveryStep(state)).not.toBeNull();
     }
+    expect(activeRecoveryStep('RECOVERY_FAILED')).toBe('HMAC_AUTH_REC');
   });
 });
